@@ -1,0 +1,73 @@
+const divProducts = document.querySelector('#productos')
+const botonFinalizar = document.querySelector('#finalizar')
+
+//funcion para llamar los productos de la APi
+const fetchProducs = async () => {
+  const productsApi = await fetch('https://fakestoreapi.com/products')
+  const productsJSON = await productsApi.json()
+  // console.log(productsJSON)
+  return productsJSON
+}
+//fetchProducs()
+
+//funcion para renderizar o mostrar los porductos 
+const renderProducts = async () => {
+  const products = await fetchProducs()
+  products.forEach(prod => {
+    const { id, title, price, category, image } = prod
+    divProducts.innerHTML += ` 
+  <div class="card">
+<img src="${image}" class="card-img-top" alt="...">
+<div class="card-body">
+  <h5 class="card-title">${title}</h5>
+  <p class="card-text">${category} ${price}</p>
+  <button id=${id} onclick="addProduct('${id}')">Agregar</button>
+  <button id=${id} onclick="removeProduct('${id}')">Quitar</button>
+</div>
+</div>`
+  })
+}
+renderProducts()
+
+// funcion que ejecute el fetch de un solo producto de la Api 
+const fetchOneProduct = async (id) => {
+  const productApi = await fetch(`https://fakestoreapi.com/products/${id}`)
+  const productJSON = await productApi.json()
+  //console.log(productJSON)
+  return productJSON
+}
+
+
+let cart = []
+
+//agregamos los productos al carrito
+const addProduct = async (id) => {
+  const product = await fetchOneProduct(id)
+  const searchProductCart = cart.find(prod => prod.id === product.id)
+  if (!searchProductCart) {
+    cart.push({
+      id: product.id,
+      name: product.title,
+      quantity: 1,
+      price: product.price
+    })
+  } else {
+    searchProductCart.quantity++
+  }
+  console.log(cart)
+}
+
+//eliminamos producto de carrito
+const removeProduct = (id) => {
+  const searchProductCart = cart.find((prod) => prod.id === id)
+  if (!searchProductCart) {
+    alert('no hay nada en el carrito')
+  } else {
+    if (searchProductCart.quantity === 1) {
+      cart = cart.filter((prod) => prod.id !== id)
+    }else {
+    searchProductCart.quantity--
+  }
+}
+  console.log(cart)
+}
